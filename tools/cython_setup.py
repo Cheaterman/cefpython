@@ -145,17 +145,9 @@ def get_winsdk_lib():
     print("[cython_setup.py] Detect Windows SDK library directory")
     ret = ""
     if WINDOWS:
-        if ARCH32:
+        if ARCH32 or ARCH64:
             winsdk_libs = [
-                # Windows 7 SDKs.
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib",
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib",
-            ]
-        elif ARCH64:
-            winsdk_libs = [
-                # Windows 7 SDKs.
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.1\\Lib\\x64",
-                r"C:\\Program Files\\Microsoft SDKs\\Windows\\v7.0\\Lib\\x64",
+                r"C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10",
             ]
         else:
             raise Exception("Unknown architecture")
@@ -200,7 +192,7 @@ def set_compiler_options(options):
         #
         # The above warning LNK4217 is caused by the warning below which occurs
         # when building the client_handler.lib static library:
-        extra_compile_args.extend(["/EHsc", "/wd4305"])
+        extra_compile_args.extend(["/EHsc", "/wd4305", "/std:c++17"])
         extra_link_args.extend(["/ignore:4217"])
 
     if LINUX or MAC:
@@ -331,7 +323,7 @@ def get_include_dirs():
         include_dirs.extend([LINUX_DIR])
         include_dirs.extend(common_include_dirs)
         include_dirs.extend([
-            '/usr/include/gtk-2.0',
+            '/usr/include/gtk-4.0',
             '/usr/include/glib-2.0',
             '/usr/include/gtk-unix-print-2.0',
             '/usr/include/cairo',
@@ -339,20 +331,6 @@ def get_include_dirs():
             '/usr/include/harfbuzz',
             '/usr/include/gdk-pixbuf-2.0',
             '/usr/include/atk-1.0',
-            # Ubuntu
-            '/usr/lib/x86_64-linux-gnu/gtk-2.0/include',
-            '/usr/lib/x86_64-linux-gnu/gtk-unix-print-2.0',
-            '/usr/lib/x86_64-linux-gnu/glib-2.0/include',
-            '/usr/lib/i386-linux-gnu/gtk-2.0/include',
-            '/usr/lib/i386-linux-gnu/gtk-unix-print-2.0',
-            '/usr/lib/i386-linux-gnu/glib-2.0/include',
-            # Fedora
-            '/usr/lib64/gtk-2.0/include',
-            '/usr/lib64/gtk-unix-print-2.0',
-            '/usr/lib64/glib-2.0/include',
-            '/usr/lib/gtk-2.0/include',
-            '/usr/lib/gtk-2.0/gtk-unix-print-2.0',
-            '/usr/lib/glib-2.0/include',
         ])
     return include_dirs
 
@@ -436,6 +414,8 @@ def get_ext_modules(options):
             "c_string_encoding": "utf-8",
             "profile": ENABLE_PROFILING,
             "linetrace": ENABLE_LINE_TRACING,
+            "show_performance_hints": False,  # default directive would produce 
+                                              # way too many warning
         },
 
         language="c++",
